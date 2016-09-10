@@ -88,6 +88,7 @@
       table.append(tbody);
 
       this.table = table;
+      this.thead = thead;
       this.tbody = tbody;
 
       input.after(table);
@@ -121,7 +122,7 @@
           //cellType = cellType || '<td>',
           rowCount = typeof(table.rowCount) !== 'undefined' ? table.rowCount + 1 : 0,
           colCount = Object.keys(options.values).length || table.colCount || 2,
-          row = $('<tr>').attr('data-row', rowCount);
+          row = $('<tr>');
 
       for(var i = 0; i < colCount; i++) {
         var cell = $(options.cellType);
@@ -146,6 +147,13 @@
       }
       
     },
+    _removeRow : function(index, parent) {
+      var parent = parent || this.tbody;
+      parent.children().eq(index).remove();
+      this.rowCount--;
+
+      this._updateFieldValue();
+    },
     _addColumn : function(index, before) {
       var table = this,
           before = before || false,
@@ -153,15 +161,28 @@
 
       for(var i = 0; i < rows.length; i++) {
         var cell = $(rows[i]).children().eq(index),
-            cellType = '<' + cell.prop('tagName').toLowerCase() + '>';
+            cellType = '<' + cell.prop('tagName').toLowerCase() + '>',
+            newCell = $(cellType);
+
+        table._bindEvent(newCell);
 
         if(before) {
-          cell.before($(cellType));
+          cell.before(newCell);
         } else {
-          cell.after($(cellType));
+          cell.after(newCell);
         }
       }
       table.colCount++;
+
+      this._updateFieldValue();
+    },
+    _removeColumn : function(index, parent) {
+      var rows = this.table.find('tr');
+      for(var i = 0; i < rows.length; i++) {
+        $(rows[i]).children().eq(index).remove();
+      }
+
+      this.colCount--;
 
       this._updateFieldValue();
     },
@@ -281,9 +302,17 @@
     },
     _getLine : function(el, operator) {
       var parent = el.parent(),
+          grandParent = parent.parent(),
           colNum = parent.children().index(el),
-          rowNum = parent.attr('data-row'),
-          lineElm = $(this.table).find('[data-row=' + (parseInt(rowNum) + parseInt(operator)) + ']').first().children().eq(colNum);
+          rowNum = grandParent.children().index(parent),
+          newRow = rowNum + parseInt(operator),
+          lineElm = grandParent.children().eq(newRow).children().eq(colNum);
+
+      if(grandParent[0] === this.tbody[0] && newRow < 0) {
+        lineElm = this.thead.find('tr').last().children().eq(colNum);
+      } else if(grandParent[0] === this.thead[0] && newRow === grandParent.children().length) {
+        lineElm = this.tbody.find('tr').first().children().eq(colNum);
+      }
 
       return lineElm;
     },
@@ -385,17 +414,29 @@
     },
     _contextMenuClick : function(btn, action, el) {
       var table = this;
+
       if(action === 'addRowBellow' || action === 'addRowAbove') {
         btn.click(function() {
           var grandParent = el.parent().parent();
-          console.log((action !== 'addRowAbove'));
           table._addRow({
             parent: grandParent,
             index: grandParent.children().index(el.parent()),
             before: (action === 'addRowAbove')
           });
         });
-      } 
+      } else if(action === 'addColRight' || action === 'addColLeft') {
+        btn.click(function(){
+          table._addColumn(el.parent().children().index(el), (action === 'addColLeft'));
+        });
+      } else if(action === 'removeRow') {
+        btn.click(function(){
+          table._removeRow(el.parent().parent().children().index(el.parent()));
+        })
+      } else if(action === 'removeCol') {
+        btn.click(function(){
+          table._removeColumn(el.parent().children().index(el));
+        })
+      }
     }
   };
 
