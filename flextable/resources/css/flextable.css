@@ -1,0 +1,43 @@
+.flextable {
+  position: relative;
+  border: 1px solid #e3e5e8;
+  border-collapse: collapse;
+}
+
+  .flextable th {
+    background-color: #f7f7f8;
+  }
+
+  .flextable th,
+  .flextable td {
+    position: relative;
+    border: 1px solid #e3e5e8;
+    empty-cells: show;
+    height: 24px;
+    min-width: 100px;
+    vertical-align: baseline;
+  }
+
+  .flextable th,
+  .flextable td,
+  .flextable__textarea {
+    padding: 6px 12px;
+    line-height: 24px;
+    font-size: 15px;
+  }
+
+  .flextable__textarea {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    left: -1px;
+    margin: 0;
+    width: calc(100% + 2px);
+    box-sizing: border-box;
+    /*min-height: 24px;*/
+  }
+
+  .flextable__textarea:focus {
+    outline: 0;
+  }
