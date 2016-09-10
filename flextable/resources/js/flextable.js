@@ -64,15 +64,24 @@
     _init : function() {
       // Var to keep tab this-reference
       // Var shortcut to element
-      var input = $(this.el),
+      var that = this,
+          input = $(this.el),
           table = $('<table>').addClass('flextable'),
           thead = $('<thead>'),
           tbody = $('<tbody>'),
-          value = JSON.parse(input.val());
+          values = JSON.parse(input.val());
 
-      this._addRow(thead, '<th>', value[0]);
-      for(var i = 1; i < value.length; i++) {
-        this._addRow(tbody, '<td>', value[i]);
+      this._addRow({
+        parent: thead,
+        cellType: '<th>',
+        values: values[0]
+      });
+
+      for(var i = 1; i < values.length; i++) {
+        this._addRow({
+          parent: tbody,
+          values: values[i]
+        });
       }
 
       table.append(thead);
@@ -83,27 +92,59 @@
 
       input.after(table);
 
+      $(document).click(function(){
+        if(that.contextMenu || false) {
+          that._removeContextMenu();
+        }
+      });
     },
-    _addRow : function(parent, cellType, values) {
+    //_addRow : function(parent, before, cellType, values) {
+    /*
+     * @option parent   <jQuery element> element to place row in, default tbody
+     * @option before   <bool> if row shold be placed before or after index
+     * @option index    <integer> index of row the new row should be placed before or after
+     * @option cellType <string> '<td>' (default) or '<tr>' to populate row with
+     * @option values   <array> array with values in this format {col1:value, col2:value, col3:value}
+     */
+    _addRow : function(options) {
       var table = this,
-          values = typeof(values) === 'object' && values ? values : [],
-          cellType = cellType || '<td>',
+          defaultOptions = {
+            parent: this.tbody,
+            before: false,
+            index: table.rowCount || 0,
+            cellType: '<td>',
+            values: []
+          },
+          options = $.extend(defaultOptions, options || {}),
+          //before = before || false,
+          //values = typeof(values) === 'object' && values ? values : [],
+          //cellType = cellType || '<td>',
           rowCount = typeof(table.rowCount) !== 'undefined' ? table.rowCount + 1 : 0,
-          colCount = Object.keys(values).length || table.colCount || 2,
+          colCount = Object.keys(options.values).length || table.colCount || 2,
           row = $('<tr>').attr('data-row', rowCount);
 
-      table.rowCount = rowCount;
-      table.colCount = colCount;
       for(var i = 0; i < colCount; i++) {
-        var cell = $(cellType);
-        if(values) {
-          cell.html(values['col' + (i + 1)])
+        var cell = $(options.cellType);
+        if(options.values) {
+          cell.html(options.values['col' + (i + 1)])
         }
         table._bindEvent(cell);
         row.append(cell);
       }
 
-      parent.append(row);
+      table.rowCount = rowCount;
+      table.colCount = colCount;
+
+      if(options.parent.children().eq(options.index).length) {
+        if(options.before) {
+          options.parent.children().eq(options.index).before(row);
+        } else {
+          options.parent.children().eq(options.index).after(row);
+        }
+      } else {
+        options.parent.append(row);
+      }
+      
     },
     _addColumn : function(index, before) {
       var table = this,
@@ -130,6 +171,14 @@
       el.click(function(e) {
         if(!el.find('textarea').length) {
           table._focus(el);
+        }
+      });
+
+      el.contextmenu(function(e){
+        if(!el.find('textarea').length) {
+          e.preventDefault();
+          table._removeContextMenu();
+          table._showContextMenu(el, e.pageX, e.pageY);
         }
       });
     },
@@ -219,7 +268,7 @@
       if(nextLineElm.length) {
         this._focus(nextLineElm);
       } else if(create) {
-        this._addRow(parent.parent());
+        this._addRow();
         this._nextLine(el);
       }
     },
@@ -276,6 +325,77 @@
       });
 
       input.val(JSON.stringify(valueArr));
+    },
+    _showContextMenu : function(el, x, y) {
+      var menu = $('<div>').addClass('flextable__contextmenu').css({'top': y + 'px', 'left': x + 'px'}),
+          options = [
+            {
+              icon: 'add-row-above',
+              text: 'Add row above',
+              action: 'addRowAbove'
+            },{
+              icon: 'add-row-bellow',
+              text: 'Add row bellow',
+              action: 'addRowBellow'
+            },{
+              type: 'separator'
+            },{
+              icon: 'add-column-right',
+              text: 'Add column to the right',
+              action: 'addColRight'
+            },{
+              icon: 'add-column-left',
+              text: 'Add column to the left',
+              action: 'addColLeft'
+            },{
+              type: 'separator'
+            }, {
+              icon: 'remove-row',
+              text: 'Remove row',
+              action: 'removeRow'
+            }, {
+              icon: 'remove-col',
+              text: 'Remove column',
+              action: 'removeCol'
+            }
+          ];
+
+      for(var i = 0; i < options.length; i++) {
+        var option = options[i],
+            optionType = option.type || 'action';
+        if(optionType === 'action') {
+          var btn = $('<button>').addClass('flextable__contextmenu__btn').attr('data-flexicon', option.icon).text(option.text);
+          this._contextMenuClick(btn, option.action, el);
+          menu.append(btn);
+        } else if(optionType === 'separator') {
+          var separator = $('<hr>');
+          menu.append(separator);
+        }
+      }
+
+      this.contextMenu = menu;
+
+      $('body').append(menu);
+    },
+    _removeContextMenu : function() {
+      if(this.contextMenu) {
+        this.contextMenu.remove();
+      }
+      this.contextMenu = null;
+    },
+    _contextMenuClick : function(btn, action, el) {
+      var table = this;
+      if(action === 'addRowBellow' || action === 'addRowAbove') {
+        btn.click(function() {
+          var grandParent = el.parent().parent();
+          console.log((action !== 'addRowAbove'));
+          table._addRow({
+            parent: grandParent,
+            index: grandParent.children().index(el.parent()),
+            before: (action === 'addRowAbove')
+          });
+        });
+      } 
     }
   };
 

@@ -41,3 +41,37 @@
   .flextable__textarea:focus {
     outline: 0;
   }
+
+  .flextable__contextmenu {
+    position: absolute;
+    z-index: 10000;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  }
+
+    .flextable__contextmenu hr {
+      margin: -1px 0 0;
+      position: relative;
+      border-color: #29323d;
+    }
+
+    .flextable__contextmenu__btn {
+      display: block;
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      padding: 8px;
+      background-color: white;
+      box-shadow: none;
+      text-align: left;
+      transition: background-color 0.3s;
+    }
+
+    .flextable__contextmenu__btn + .flextable__contextmenu__btn {
+      border-top: 1px solid #e3e5e8;
+    }
+
+    .flextable__contextmenu__btn:hover,
+    .flextable__contextmenu__btn:focus {
+      background-color: #d5d8dd;
+    }
