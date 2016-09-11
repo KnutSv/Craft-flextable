@@ -205,6 +205,34 @@
           table._showContextMenu(el, e.pageX, e.pageY);
         }
       });
+
+      el.bind('paste', function(e){
+        var pastedData = e.originalEvent.clipboardData.getData('text'),
+            pastedDataLines = pastedData.split('\n'),
+            cell = el,
+            row = el.parent(),
+            cellIndex = row.children().index(cell);
+
+        if(pastedDataLines.length > 1 && pastedDataLines[0].indexOf('\t') > -1) {
+          el.find('textarea').blur();
+          $.each(pastedDataLines, function(index, line){
+            var tabs = line.split('\t');
+            $.each(tabs, function(index, tab) {
+              cell.html(tab);
+              if(tabs.length > (index + 1)) {
+                cell = cell.next();
+              }
+            });
+            if(pastedDataLines.length > (index + 1)) {
+              row = row.next();
+              cell = row.children().eq(cellIndex);
+            }
+          });
+          table._focus(cell);
+          return false;
+        }
+        
+      });
     },
     _focus : function(el) {
       this._editMode(el);
