@@ -1,0 +1,12 @@
+<table>
+  <thead>
+    {% for row in rows[:1] %}
+      <tr>
+        {% for col in row %}
+          <th>{{ col }}</th>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </thead>
+
+</table>

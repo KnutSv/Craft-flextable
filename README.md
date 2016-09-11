@@ -9,3 +9,28 @@ This field type is under development, it is not ready for use yet!
 
 * Edit tables like in Excel or other spreadsheet programs, enter creates a new line, tab adds a new columns
 * Creates accessible tables with table headers and table caption
+
+## Templating
+You can use the data returned from the field like so:
+```
+  <table>
+    <thead>
+      {% for row in entry.field.thead %}
+        <tr>
+          {% for cell in row %}
+            <{{ cell.type }}>{{ cell.text }}</{{ cell.type }}>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </thead>
+    <tbody>
+      {% for row in entry.field.tbody %}
+        <tr>
+          {% for cell in row %}
+            <{{ cell.type }}>{{ cell.text }}</{{ cell.type }}>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+```

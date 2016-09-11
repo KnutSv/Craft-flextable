@@ -13,6 +13,17 @@ class FlexTableFieldType extends BaseFieldType
         return array(AttributeType::String, 'column' => ColumnType::Text);
     }
 
+    public function prepValue($value)
+    {
+        return JsonHelper::decode(JsonHelper::decode($value));
+    }
+
+    public function prepValueFromPost($value)
+    {
+
+        return JsonHelper::encode($value);
+    }
+
     public function getInputHtml($name, $value)
     {
         // Reformat the input name into something that looks more like an ID
@@ -30,8 +41,9 @@ class FlexTableFieldType extends BaseFieldType
         return craft()->templates->render('flextable/edit', array(
             'name'  => $name,
             'id'    => $id,
-            'value' => $value
+            'value' => JsonHelper::encode($value)
         ));
 
     }
+
 }

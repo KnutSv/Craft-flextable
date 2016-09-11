@@ -73,14 +73,14 @@
 
       this._addRow({
         parent: thead,
-        cellType: '<th>',
-        values: values[0]
+        cellType: 'th',
+        values: values.thead[0]
       });
 
-      for(var i = 1; i < values.length; i++) {
+      for(var i = 0; i < values.tbody.length; i++) {
         this._addRow({
           parent: tbody,
-          values: values[i]
+          values: values.tbody[i]
         });
       }
 
@@ -113,21 +113,21 @@
             parent: this.tbody,
             before: false,
             index: table.rowCount || 0,
-            cellType: '<td>',
+            cellType: 'td',
             values: []
           },
           options = $.extend(defaultOptions, options || {}),
-          //before = before || false,
-          //values = typeof(values) === 'object' && values ? values : [],
-          //cellType = cellType || '<td>',
           rowCount = typeof(table.rowCount) !== 'undefined' ? table.rowCount + 1 : 0,
-          colCount = Object.keys(options.values).length || table.colCount || 2,
+          colCount = options.values.length || table.colCount || 2,
           row = $('<tr>');
 
+
+
       for(var i = 0; i < colCount; i++) {
-        var cell = $(options.cellType);
-        if(options.values) {
-          cell.html(options.values['col' + (i + 1)])
+        var cellType = options.values.length ? options.values[i].type : options.cellType,
+            cell = $('<' + cellType + '>');
+        if(options.values.length) {
+          cell.html(options.values[i].text);
         }
         table._bindEvent(cell);
         row.append(cell);
@@ -161,7 +161,7 @@
 
       for(var i = 0; i < rows.length; i++) {
         var cell = $(rows[i]).children().eq(index),
-            cellType = '<' + cell.prop('tagName').toLowerCase() + '>',
+            cellType = '<' + table._getElementType(cell) + '>',
             newCell = $(cellType);
 
         table._bindEvent(newCell);
@@ -175,6 +175,9 @@
       table.colCount++;
 
       this._updateFieldValue();
+    },
+    _getElementType : function(element) {
+      return element.prop('tagName').toLowerCase();
     },
     _removeColumn : function(index, parent) {
       var rows = this.table.find('tr');
@@ -335,25 +338,39 @@
       }
     },
     _updateFieldValue : function() {
-      var input = this.el.parent().find('input').first(),
-          valueArr = [];
+      var table = this,
+          input = this.el.parent().find('input').first(),
+          valueArr = {
+            thead: [],
+            tbody: []
+          };
 
-      this.table.find('tr').each(function(){
-        var rowObj = {},
-            colNum = 1;
-
-        $(this).find('td, th').each(function(){
-          var colKey = 'col' + colNum,
-              cellElm = $(this);
-          // If the row has textarea (is in focus), just add the text before that
-          rowObj[colKey] = cellElm.html().split("<textarea")[0];
-          colNum++;
-        });
-
-        valueArr.push(rowObj);
+      this.table.find('thead tr').each(function(){
+        valueArr.thead.push(buildRow(this));
       });
 
+      this.table.find('tbody tr').each(function(){
+        valueArr['tbody'].push(buildRow(this));
+      });
+
+      function buildRow(tr) {
+        var row = [];
+
+        $(tr).find('th, td').each(function(){
+          var elm = $(this);
+          row.push({
+            type: table._getElementType(elm),
+            text: table._cleanHtml(elm.html())
+          });
+        });
+
+        return row;
+      }
+
       input.val(JSON.stringify(valueArr));
+    },
+    _cleanHtml : function(html) {
+      return html.split("<textarea")[0];
     },
     _showContextMenu : function(el, x, y) {
       var menu = $('<div>').addClass('flextable__contextmenu').css({'top': y + 'px', 'left': x + 'px'}),
