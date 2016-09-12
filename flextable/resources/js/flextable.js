@@ -256,7 +256,7 @@
           el = $(el),
           textarea = $('<textarea>').addClass('flextable__textarea');
       
-      textarea.css('font-weight', el.css('font-weight')).val(el.text());
+      textarea.css({'font-weight': el.css('font-weight'), 'text-align': el.attr('align') || 'left'}).val(el.text());
 
       $(el).append(textarea);
 
