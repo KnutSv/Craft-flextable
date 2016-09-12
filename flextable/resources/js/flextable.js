@@ -93,9 +93,23 @@
 
       input.after(table);
 
+      table.find('thead th').mouseenter(function(e){
+        that._showAlignmentMenu($(this));
+      }).mouseleave(function(e){
+        if(!that.alignmentMenu.is(':hover')) {
+          that.alignmentMenu.remove();
+        } else {
+          that.alignmentMenu.mouseleave(function(){
+            that.alignmentMenu.remove();
+          });
+        }
+        
+      });
+
       $(document).click(function(){
         if(that.contextMenu || false) {
           that._removeContextMenu();
+          that.contextMenu = null;
         }
       });
     },
@@ -127,7 +141,7 @@
         var cellType = options.values.length ? options.values[i].type : options.cellType,
             cell = $('<' + cellType + '>');
         if(options.values.length) {
-          cell.html(options.values[i].text);
+          cell.html(options.values[i].text).attr('align', options.values[i].align);
         }
         table._bindEvent(cell);
         row.append(cell);
@@ -388,7 +402,8 @@
           var elm = $(this);
           row.push({
             type: table._getElementType(elm),
-            text: table._cleanHtml(elm.html())
+            text: table._cleanHtml(elm.html()),
+            align: elm.attr('align') || 'left'
           });
         });
 
@@ -482,6 +497,49 @@
           table._removeColumn(el.parent().children().index(el));
         })
       }
+    },
+    _showAlignmentMenu : function(el) {
+      var container = $('<div>').addClass('flextable__alignmenu').css({'top': (el.offset().top - 17) + 'px', 'left': el.offset().left + 'px', 'width': (el.outerWidth() + 1) + 'px'}),
+          buttons = [
+            {
+              'icon': 'leftAlign',
+              'text': 'Left',
+              'action': 'left'
+            },{
+              'icon': 'centerAlign',
+              'text': 'Center',
+              'action': 'center'
+            },{
+              'icon': 'rightAlign',
+              'text': 'Right',
+              'action': 'right'
+            }
+          ];
+
+      for(var i = 0; i < buttons.length; i++) {
+        var btn = buttons[i],
+            btnElm = $('<button>')
+              .addClass('flextable__alignmenu__btn')
+              .attr('data-flexicon', btn.icon)
+              .text(btn.text);
+        this._alignmentMenuClick(btnElm, btn.action, el);
+        container.append(btnElm);
+      }
+
+      this.alignmentMenu = container;
+      $('body').append(container);
+    },
+    _alignmentMenuClick : function(btn, action, cell) {
+      var that = this;
+      btn.click(function(){
+        var cellIndex = cell.parent().children().index(cell);
+
+        that.table.find('tr').each(function(){
+          $(this).children().eq(cellIndex).attr('align', action);
+        });
+
+        that._updateFieldValue();
+      });
     }
   };
 
