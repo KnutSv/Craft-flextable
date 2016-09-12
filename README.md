@@ -15,19 +15,19 @@ You can use the data returned from the field like so:
 ```
   <table>
     <thead>
-      {% for row in entry.field.thead %}
+      {% for row in entry.test.thead %}
         <tr>
           {% for cell in row %}
-            <{{ cell.type }}>{{ cell.text }}</{{ cell.type }}>
+            <{{ cell.type }} class="{{ cell.align }}">{{ cell.text }}</{{ cell.type }}>
           {% endfor %}
         </tr>
       {% endfor %}
     </thead>
     <tbody>
-      {% for row in entry.field.tbody %}
+      {% for row in entry.test.tbody %}
         <tr>
           {% for cell in row %}
-            <{{ cell.type }}>{{ cell.text }}</{{ cell.type }}>
+            <{{ cell.type }} class="{{ cell.align }}">{{ cell.text }}</{{ cell.type }}>
           {% endfor %}
         </tr>
       {% endfor %}
