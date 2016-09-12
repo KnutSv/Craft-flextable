@@ -274,6 +274,10 @@
       
       textarea.css({'font-weight': el.css('font-weight'), 'text-align': el.attr('align') || 'left'}).val(el.text());
 
+      if(table.alignmentMenu) {
+        table.alignmentMenu.remove();
+      }
+
       $(el).append(textarea);
 
       textarea.keydown(function(e) {
