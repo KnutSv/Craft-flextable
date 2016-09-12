@@ -12,7 +12,7 @@ This field type is under development, it is not ready for use yet!
 
 ## Templating
 You can use the data returned from the field like so:
-```
+```twig
   <table>
     <thead>
       {% for row in entry.test.thead %}
