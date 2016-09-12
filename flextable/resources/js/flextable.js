@@ -69,18 +69,19 @@
           table = $('<table>').addClass('flextable'),
           thead = $('<thead>'),
           tbody = $('<tbody>'),
-          values = JSON.parse(input.val());
+          values = JSON.parse(input.val()),
+          rowLength = values && values.hasOwnProperty('tbody') ? values.tbody.length : 1;
 
       this._addRow({
         parent: thead,
         cellType: 'th',
-        values: values.thead[0]
+        values: values && values.hasOwnProperty('thead') ? values.thead[0] : []
       });
 
-      for(var i = 0; i < values.tbody.length; i++) {
+      for(var i = 0; i < rowLength; i++) {
         this._addRow({
           parent: tbody,
-          values: values.tbody[i]
+          values: values && values.hasOwnProperty('tbody') ? values.tbody[i] : []
         });
       }
 
@@ -92,19 +93,6 @@
       this.tbody = tbody;
 
       input.after(table);
-
-      table.find('thead th').mouseenter(function(e){
-        that._showAlignmentMenu($(this));
-      }).mouseleave(function(e){
-        if(!that.alignmentMenu.is(':hover')) {
-          that.alignmentMenu.remove();
-        } else {
-          that.alignmentMenu.mouseleave(function(){
-            that.alignmentMenu.remove();
-          });
-        }
-        
-      });
 
       $(document).click(function(){
         if(that.contextMenu || false) {
@@ -170,6 +158,7 @@
     },
     _addColumn : function(index, before) {
       var table = this,
+          index = index || table.colCount - 1,
           before = before || false,
           rows = this.table.find('tr');
 
@@ -220,6 +209,23 @@
         }
       });
 
+      // Add this event only for first header row
+
+      if(table._getElementType(el) === 'th') {
+        el.mouseenter(function(e){
+          table._showAlignmentMenu($(this));
+        }).mouseleave(function(e){
+          if(!table.alignmentMenu.is(':hover')) {
+            table.alignmentMenu.remove();
+          } else {
+            table.alignmentMenu.mouseleave(function(){
+              table.alignmentMenu.remove();
+            });
+          }
+          
+        });
+      }
+
       el.bind('paste', function(e){
         var pastedData = e.originalEvent.clipboardData.getData('text'),
             pastedDataLines = pastedData.split('\n'),
@@ -227,18 +233,28 @@
             row = el.parent(),
             cellIndex = row.children().index(cell);
 
-        if(pastedDataLines.length > 1 && pastedDataLines[0].indexOf('\t') > -1) {
+        if(pastedDataLines[0].indexOf('\t') > -1) {
           el.find('textarea').blur();
           $.each(pastedDataLines, function(index, line){
             var tabs = line.split('\t');
             $.each(tabs, function(index, tab) {
               cell.html(tab);
               if(tabs.length > (index + 1)) {
+                if(cell.is(':last-child')) {
+                  table._addColumn();
+                }
                 cell = cell.next();
               }
             });
             if(pastedDataLines.length > (index + 1)) {
-              row = row.next();
+              if(table._getElementType(row.parent()) === 'thead') {
+                row = table.table.find('tbody tr').eq(0);
+              } else {
+                if(row.is(':last-child')) {
+                  table._addRow();
+                }
+                row =  row.next();
+              }
               cell = row.children().eq(cellIndex);
             }
           });
