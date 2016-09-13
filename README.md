@@ -14,8 +14,9 @@ This field type is under development, it is not ready for use yet!
 You can use the data returned from the field like so:
 ```twig
   <table>
+    <caption>{{ entry.field.meta.caption }}</caption>
     <thead>
-      {% for row in entry.test.thead %}
+      {% for row in entry.field.thead %}
         <tr>
           {% for cell in row %}
             <{{ cell.type }} class="{{ cell.align }}">{{ cell.text }}</{{ cell.type }}>
@@ -24,7 +25,7 @@ You can use the data returned from the field like so:
       {% endfor %}
     </thead>
     <tbody>
-      {% for row in entry.test.tbody %}
+      {% for row in entry.field.tbody %}
         <tr>
           {% for cell in row %}
             <{{ cell.type }} class="{{ cell.align }}">{{ cell.text }}</{{ cell.type }}>
