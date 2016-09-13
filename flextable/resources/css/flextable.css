@@ -1,11 +1,33 @@
+.flextable-wrapper {
+  padding: 14px;
+  border-radius: 4px;
+  border: 1px solid #e3e5e8;
+  background: #fafafa;
+}
+
+.matrixblock .flextable-wrapper {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.flextable-wrapper input.text {
+  margin-bottom: 15px;
+}
+
 .flextable {
   position: relative;
   border: 1px solid #e3e5e8;
   border-collapse: collapse;
+  width: 100%;
 }
 
   .flextable th {
     background-color: #f7f7f8;
+  }
+
+  .flextable td {
+    background-color: #fff;
   }
 
   .flextable th,

@@ -70,6 +70,9 @@
           thead = $('<thead>'),
           tbody = $('<tbody>'),
           values = JSON.parse(input.val()),
+          inputId = input.attr('id') + '-caption',
+          captionLabel = $('<label>').attr('for', inputId).text('Caption'),
+          captionInput = $('<input id="' + inputId + '">').addClass('text fullwidth').val(values && values.meta && values.meta.caption ? values.meta.caption : ''),
           rowLength = values && values.hasOwnProperty('tbody') ? values.tbody.length : 1;
 
       this._addRow({
@@ -91,8 +94,15 @@
       this.table = table;
       this.thead = thead;
       this.tbody = tbody;
+      this.caption = captionInput;
+
+      captionInput.keydown(function(e) {
+        that._updateFieldValue();
+      });
 
       input.after(table);
+      input.after(captionInput);
+      input.after(captionLabel);
 
       $(document).click(function(){
         if(that.contextMenu || false) {
@@ -404,7 +414,8 @@
           input = this.el.parent().find('input').first(),
           valueArr = {
             thead: [],
-            tbody: []
+            tbody: [],
+            meta: {}
           };
 
       this.table.find('thead tr').each(function(){
@@ -430,6 +441,8 @@
         return row;
       }
 
+      valueArr.meta.caption = table.caption.val();
+
       input.val(JSON.stringify(valueArr));
     },
     _cleanHtml : function(html) {
@@ -441,38 +454,44 @@
             {
               icon: 'add-row-above',
               text: 'Add row above',
-              action: 'addRowAbove'
+              action: 'addRowAbove',
+              header: false
             },{
               icon: 'add-row-bellow',
               text: 'Add row bellow',
-              action: 'addRowBellow'
+              action: 'addRowBellow',
+              header: false
             },{
               type: 'separator'
             },{
               icon: 'add-column-right',
               text: 'Add column to the right',
-              action: 'addColRight'
+              action: 'addColRight',
+              header: true
             },{
               icon: 'add-column-left',
               text: 'Add column to the left',
-              action: 'addColLeft'
+              action: 'addColLeft',
+              header: true
             },{
               type: 'separator'
-            }, {
+            },{
               icon: 'remove-row',
               text: 'Remove row',
-              action: 'removeRow'
-            }, {
+              action: 'removeRow',
+              header: false
+            },{
               icon: 'remove-col',
               text: 'Remove column',
-              action: 'removeCol'
+              action: 'removeCol',
+              header: true
             }
           ];
 
       for(var i = 0; i < options.length; i++) {
         var option = options[i],
             optionType = option.type || 'action';
-        if(optionType === 'action') {
+        if(optionType === 'action' && (this._getElementType(el.parent().parent()) !== 'thead' || option.header)) {
           var btn = $('<button>').addClass('flextable__contextmenu__btn').attr('data-flexicon', option.icon).text(option.text);
           this._contextMenuClick(btn, option.action, el);
           menu.append(btn);
