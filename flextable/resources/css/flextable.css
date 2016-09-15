@@ -5,6 +5,11 @@
   background: #fafafa;
 }
 
+.flextable-overflow-wrapper {
+  max-width: 100%;
+  overflow: auto;
+}
+
 .matrixblock .flextable-wrapper {
   padding: 0;
   border: 0;

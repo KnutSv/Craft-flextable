@@ -66,6 +66,7 @@
       // Var shortcut to element
       var that = this,
           input = $(this.el),
+          div = $('<div>').addClass('flextable-overflow-wrapper'),
           table = $('<table>').addClass('flextable'),
           thead = $('<thead>'),
           tbody = $('<tbody>'),
@@ -100,7 +101,8 @@
         that._updateFieldValue();
       });
 
-      input.after(table);
+      div.append(table)
+      input.after(div);
       input.after(captionInput);
       input.after(captionLabel);
 
@@ -237,7 +239,7 @@
       }
 
       el.bind('paste', function(e){
-        var pastedData = e.originalEvent.clipboardData.getData('text'),
+        var pastedData = (window.clipboardData && window.clipboardData.getData) ? window.clipboardData.getData('Text') : e.originalEvent.clipboardData.getData('text/plain'),
             pastedDataLines = pastedData.split('\n'),
             cell = el,
             row = el.parent(),
@@ -329,7 +331,7 @@
       textarea.focus().blur(function() {
         el.text($(this).val());
         el.css('height', '');
-        this.remove();
+        $(this).remove();
         table._updateFieldValue();
       });
     },
