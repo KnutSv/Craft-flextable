@@ -227,6 +227,7 @@
         el.mouseenter(function(e){
           table._showAlignmentMenu($(this));
         }).mouseleave(function(e){
+
           if(!table.alignmentMenu.is(':hover')) {
             table.alignmentMenu.remove();
           } else {
@@ -290,7 +291,7 @@
         table.alignmentMenu.remove();
       }
 
-      $(el).append(textarea);
+      el.append(textarea);
 
       textarea.keydown(function(e) {
         var textVal = $(this).val();
@@ -330,7 +331,6 @@
 
       textarea.focus().blur(function() {
         el.text($(this).val());
-        el.css('height', '');
         $(this).remove();
         table._updateFieldValue();
       });

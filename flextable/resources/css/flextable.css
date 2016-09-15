@@ -23,7 +23,11 @@
 .flextable {
   position: relative;
   border: 1px solid #e3e5e8;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-width: 1px 0 0 1px;
+  border-style: solid;
+  border-color: #e3e5e8;
   width: 100%;
 }
 
@@ -38,7 +42,9 @@
   .flextable th,
   .flextable td {
     position: relative;
-    border: 1px solid #e3e5e8;
+    border-width: 0 1px 1px 0;
+    border-style: solid;
+    border-color: #e3e5e8;
     empty-cells: show;
     height: 24px;
     min-width: 100px;
@@ -71,8 +77,12 @@
     left: -1px;
     margin: 0;
     width: calc(100% + 2px);
+    height: calc(100% + 2px);
     box-sizing: border-box;
-    /*min-height: 24px;*/
+    min-height: 37px;
+    overflow: auto; /* for IE11 */
+    resize: none;
+    -ms-overflow-style: none;
   }
 
   .flextable__textarea:focus {
