@@ -10,6 +10,10 @@
     // Extends defaults-options with user defined options
     this.options = $.extend( this.defaults, options || {} );
 
+    this.editmode = false;
+
+    this.ie = msieversion();
+
     // Let the fun begin!
     this._init();
 
@@ -74,7 +78,10 @@
           inputId = input.attr('id') + '-caption',
           captionLabel = $('<label>').attr('for', inputId).text('Caption'),
           captionInput = $('<input id="' + inputId + '">').addClass('text fullwidth').val(values && values.meta && values.meta.caption ? values.meta.caption : ''),
-          rowLength = values && values.hasOwnProperty('tbody') ? values.tbody.length : 1;
+          rowLength = values && values.hasOwnProperty('tbody') ? values.tbody.length : 1,
+          resizeFunction = debounce(function(){
+            that._updateTextareaHeight(that.editmode, that.editmode.parent().parent());
+          }, 200);
 
       this._addRow({
         parent: thead,
@@ -110,6 +117,12 @@
         if(that.contextMenu || false) {
           that._removeContextMenu();
           that.contextMenu = null;
+        }
+      });
+
+      $(window).resize(function(){
+        if(that.editmode !== false) {
+          resizeFunction();
         }
       });
     },
@@ -284,7 +297,9 @@
       var table = this,
           el = $(el),
           textarea = $('<textarea>').addClass('flextable__textarea');
-      
+
+      table.editmode = textarea;
+
       textarea.css({'font-weight': el.css('font-weight'), 'text-align': el.attr('align') || 'left'}).val(el.text());
 
       if(table.alignmentMenu) {
@@ -292,6 +307,8 @@
       }
 
       el.append(textarea);
+
+      table._updateTextareaHeight(textarea, el.parent());
 
       textarea.keydown(function(e) {
         var textVal = $(this).val();
@@ -322,6 +339,8 @@
           //el.text($(this).val());
           table._updateFieldValue();
 
+          table._updateTextareaHeight(textarea, el.parent());
+
           // if(this.scrollHeight > $(this).outerHeight() ) {
           //   $(this).height(this.scrollHeight - 12);
           //   el.height(this.scrollHeight - 12);
@@ -330,10 +349,26 @@
       });
 
       textarea.focus().blur(function() {
+        table.editmode = false;
         el.text($(this).val());
         $(this).remove();
         table._updateFieldValue();
       });
+    },
+    _updateTextareaHeight : function(textarea, row) {
+      if(this.ie) {
+        var height = 0;
+
+        row.children().each(function(){
+          var elHeight = $(this).outerHeight();
+
+          if(elHeight > height) {
+            height = elHeight - 13;
+          }
+        });
+
+        textarea.height(height);
+      }
     },
     _updateTextWhileEditing : function(el, val) {
       el.contents().filter(function() { return this.nodeType == 3; }).remove();
@@ -540,7 +575,7 @@
       }
     },
     _showAlignmentMenu : function(el) {
-      var container = $('<div>').addClass('flextable__alignmenu').css({'top': (el.offset().top - 17) + 'px', 'left': el.offset().left + 'px', 'width': (el.outerWidth() + 1) + 'px'}),
+      var container = $('<div>').addClass('flextable__alignmenu').css({'top': (el.offset().top - 19) + 'px', 'left': el.offset().left + 'px', 'width': (el.outerWidth() + 1) + 'px'}),
           buttons = [
             {
               'icon': 'leftAlign',
@@ -583,6 +618,36 @@
       });
     }
   };
+
+  // https://davidwalsh.name/javascript-debounce-function
+  function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) func.apply(context, args);
+    };
+  };
+
+  // http://stackoverflow.com/questions/19999388/check-if-user-is-using-ie-with-jquery
+  function msieversion() {
+
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+
+    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))  // If Internet Explorer, return version number
+    {
+        return true;
+    }
+
+    return false;
+  }
 
   // Add object to global namespace
   // This makes it accessible outside the function
