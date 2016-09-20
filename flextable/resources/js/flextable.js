@@ -148,13 +148,14 @@
           colCount = options.values.length || table.colCount || 2,
           row = $('<tr>');
 
-
-
       for(var i = 0; i < colCount; i++) {
         var cellType = options.values.length ? options.values[i].type : options.cellType,
             cell = $('<' + cellType + '>');
         if(options.values.length) {
           cell.html(options.values[i].text).attr('align', options.values[i].align);
+        } else {
+          // Set align to the same as the cell directly above, fall back to 'left'
+          cell.attr('align', options.parent.children().eq(options.index - 1).children().eq(i).attr('align') || 'left');
         }
         table._bindEvent(cell);
         row.append(cell);
