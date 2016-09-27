@@ -126,7 +126,6 @@
         }
       });
     },
-    //_addRow : function(parent, before, cellType, values) {
     /*
      * @option parent   <jQuery element> element to place row in, default tbody
      * @option before   <bool> if row shold be placed before or after index
@@ -242,7 +241,7 @@
           table._showAlignmentMenu($(this));
         }).mouseleave(function(e){
 
-          if(!table.alignmentMenu.is(':hover')) {
+          if(!table._isHover(e, table.alignmentMenu)) {
             table.alignmentMenu.remove();
           } else {
             table.alignmentMenu.mouseleave(function(){
@@ -290,6 +289,17 @@
         }
         
       });
+    },
+    // Need a custom hover check, because is(':hover') is not working consistently in FF an IE
+    _isHover : function(event, el) {
+      var mouseX = event.pageX,
+          mouseY = event.pageY,
+          elLeft = el.position().left,
+          elRight = elLeft + el.outerWidth(),
+          elTop = el.position().top,
+          elBottom = elTop + el.outerHeight();
+
+      return mouseX > elLeft && mouseX < elRight && mouseY > elTop && mouseY < elBottom;
     },
     _focus : function(el) {
       this._editMode(el);
@@ -576,7 +586,7 @@
       }
     },
     _showAlignmentMenu : function(el) {
-      var container = $('<div>').addClass('flextable__alignmenu').css({'top': (el.offset().top - 19) + 'px', 'left': el.offset().left + 'px', 'width': (el.outerWidth() + 1) + 'px'}),
+      var container = $('<div>').addClass('flextable__alignmenu').css({'top': (el.offset().top - 17) + 'px', 'left': el.offset().left + 'px', 'width': (el.outerWidth() + 1) + 'px'}),
           buttons = [
             {
               'icon': 'leftAlign',

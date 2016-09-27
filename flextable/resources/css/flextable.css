@@ -133,6 +133,7 @@
 
   .flextable__alignmenu {
     position: absolute;
+    z-index: 1000;
   }
 
     .flextable__alignmenu__btn {
