@@ -1,8 +1,13 @@
 <template>
-  <textarea v-model="value" v-bind:data-keep="keepData.toString()" class="input-holder" :style="{top, left, width, height}" @click.stop="keepData = true" @focus="focusIn" @blur="focusOut" @input="update()" ref="input"></textarea>
+  <div class="input-holder" :style="{top, left, width, height}" @click.stop="">
+    <vue-editor :editorOptions="{modules: {toolbar: '#flextable-editor-toolbar'}}" @click.stop="keepData = true" @focus="focusIn" @blur="focusOut" @input="update()" ref="input"></vue-editor>
+  </div>
+  <!-- <textarea v-model="value" class="input-holder" :style="{top, left, width, height}" @click.stop="keepData = true" @focus="focusIn" @blur="focusOut" @input="update()" ref="input"></textarea> -->
 </template>
 
 <script>
+import { VueEditor } from 'vue2-editor'
+
 export default {
   name: 'active-cell-input-holder',
   props: {
@@ -25,6 +30,7 @@ export default {
   },
   data() {
     return {
+      hasFocus: false,
       heightPadding: 6,
       keepData: true,
       widthPadding: 12,
@@ -51,6 +57,9 @@ export default {
       return `${this.widthInt - (this.widthPadding * 2) - 1}px`
     }
   },
+  components: {
+    VueEditor
+  },
   methods: {
     checkKey(event) {
       const arrowKeys = {
@@ -63,38 +72,47 @@ export default {
       // If arrow keys are pressed choose the corresponding arrow key action
       if( Object.keys(arrowKeys).includes(event.key)) {
         event.preventDefault()
-        this.$refs.input.blur()
+        this.$refs.input.quill.blur()
         this.$store.dispatch(arrowKeys[event.key])
       // Else tab through the cells, if shift is presses simultaneously move in other direction
       } else if( event.key === 'Tab' ) {
         event.preventDefault()
-        this.$refs.input.blur()
+        this.$refs.input.quill.blur()
         this.$store.dispatch('next', !event.shiftKey)
       // Else if the textarea does not have focus, give it focus
       } else if(this.$refs.input !== document.activeElement) {
         this.keepData = false
-        this.$refs.input.focus()
+        this.$refs.input.quill.focus()
       }
     },
     checkKeyUp(event) {
 
     },
     focusIn() {
-      this.value = this.keepData ? this.$store.getters.activeCellContent : ''
+      console.log(this.hasFocus)
+      if( !this.hasFocus ) {
+
+      } else {
+        this.value = this.keepData ? this.$store.getters.activeCellContent : ''
+        this.$refs.input.quill.setText(this.value)
+        this.hasFocus = true
+      }
     },
     focusOut() {
+      console.log('focusout')
       this.value = ''
       this.keepData = true
+      this.hasFocus = false
     },
     update() {
-      this.$store.dispatch('setContent', this.$refs.input.value)
+      this.$store.dispatch('setContent', this.$refs.input.quill.getText())
     }
   },
   mounted() {
-    window.addEventListener('keydown', this.checkKey)
+    //window.addEventListener('keydown', this.checkKey)
   },
   beforeDestroy() {
-    window.removeEventListener('keydown', this.checkKey)
+    //window.removeEventListener('keydown', this.checkKey)
   }
 }
 </script>
