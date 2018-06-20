@@ -34,8 +34,10 @@ class FlexTableFieldType extends BaseFieldType
 
         // Include our Javascript
         craft()->templates->includeCssResource('flextable/css/flextable.css');
-        craft()->templates->includeJsResource('flextable/js/flextable.js');
-        craft()->templates->includeJs("$('#{$namespacedId}').flextable();");
+        //craft()->templates->includeJsResource('flextable/js/flextable.js');
+        craft()->templates->includeJsResource('flextable/js/vue-flextable.js');
+        //craft()->templates->includeJs("$('#{$namespacedId}').flextable();");
+
 
         // Render the HTML
         return craft()->templates->render('flextable/edit', array(
