@@ -4,7 +4,7 @@
     <div class="marker marker--v" :style="{top, left: right, height}"></div>
     <div class="marker marker--h" :style="{top: bottom, left, width}"></div>
     <div class="marker marker--v" :style="{top, left, height}"></div>
-    <active-cell-input-holder :heightInt="heightInt" :leftInt="leftInt" :topInt="topInt" :widthInt="widthInt" @click.stop="test"></active-cell-input-holder>
+    <active-cell-input-holder :heightInt="heightInt" :leftInt="leftInt" :topInt="topInt" :widthInt="widthInt" @click.stop=""></active-cell-input-holder>
   </div>
 </template>
 
@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     setWindowWidth: debounce(function() {
-      console.log(window.innerWidth)
+      //console.log(window.innerWidth)
       this.windowWidth = window.innerWidth
     }, 200)
   },

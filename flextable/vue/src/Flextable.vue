@@ -4,28 +4,38 @@
 
     <init v-if="$store.getters.isEmpty"></init>
     <div v-else>
+      <div>
+        <label v-bind:for="`caption_input_${_uid}`">{{ $t('CAPTION') }}</label>
+        <input v-bind:value="caption" v-bind:id="`caption_input_${_uid}`" @input="updateCaption" class="text fullwidth" type="text">
+      </div>
       <div style="margin-bottom: 16px;">
         <button @click.stop.prevent="$store.dispatch('addColumn')">{{ $t('ADD_COLUMN') }}</button>
         <button @click.stop.prevent="$store.dispatch('addRow')">{{ $t('ADD_ROW') }}</button>
       </div>
       <div id="flextable-editor-toolbar"></div>
       <div class="flextable-content">
-        <table class="flextable">
-          <tr v-for="(row, rowIndex) in rows">
-            <template v-for="(cell, colIndex) in row">
-              <th v-if="cell.type === 'th'" v-html="format(cell.text)" v-bind:class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)"></th>
-              <td v-else v-html="format(cell.text)" v-bind:class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)"></td>
-            </template>
-          </tr>
-        </table>
-        <active-cell-marker v-bind:activeElm="activeElm"></active-cell-marker>
+        <div class="flextable-content-overflow">
+          <table class="flextable">
+            <tr v-for="(row, rowIndex) in rows">
+              <template v-for="(cell, colIndex) in row">
+                <th @click.right.prevent="helperMenu($event, rowIndex, colIndex)" v-if="cell.type === 'th'" v-html="format(cell.text)" v-bind:class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)"></th>
+                <td @click.right.prevent="helperMenu($event, rowIndex, colIndex)" v-else v-html="format(cell.text)" v-bind:class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)"></td>
+              </template>
+            </tr>
+          </table>
+          <active-cell-marker v-bind:activeElm="activeElm"></active-cell-marker>
+        </div>
+        <helper-menu></helper-menu>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import ActiveCellMarker from './components/ActiveCellMarker.vue'
+import HelperMenu from './components/HelperMenu.vue'
 import Init from './components/Init.vue'
 
 export default {
@@ -50,6 +60,9 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      caption: state => state.meta.caption
+    }),
     activeElm() {
       const ref = `cell_${this.activeElmRow}_${this.activeElmCol}`
       const elm = this.$refs.hasOwnProperty(ref) ? this.$refs[ref][0] : null
@@ -73,6 +86,7 @@ export default {
   },
   components: {
     ActiveCellMarker,
+    HelperMenu,
     Init
   },
   methods: {
@@ -85,6 +99,15 @@ export default {
       return string
       //return string.replace(/(?:\r\n|\r|\n)/g, '<br>')
     },
+    helperMenu(event, rowIndex, colIndex) {
+      //console.log(event.target.tagName)
+      this.$store.commit('setHelperMenu', {
+        type: event.target.tagName,
+        top: event.layerY,
+        left: event.layerX
+      })
+      this.select(rowIndex, colIndex, true)
+    },
     isActiveCell(rowIndex, colIndex) {
       return rowIndex === this.activeElmRow && colIndex === this.activeElmCol
     },
@@ -92,14 +115,21 @@ export default {
       if(!update) {
         this.$store.dispatch('setContent', this.activeElmOldContent)
       }
-
+      this.$store.commit('resetHelperMenu')
       this.$store.commit('setActiveRow', null)
       this.$store.commit('setActiveCol', null)
       this.activeElmOldContent = ''
     },
-    select(rowIndex, colIndex) {
+    select(rowIndex, colIndex, keepMenu) {
+      if( !keepMenu ) {
+        this.$store.commit('resetHelperMenu')
+      }
+
       this.$store.commit('setActiveRow', rowIndex)
       this.$store.commit('setActiveCol', colIndex)
+    },
+    updateCaption(event) {
+      this.$store.commit('setCaption', event.target.value)
     }
   },
   mounted() {
@@ -127,10 +157,14 @@ export default {
 
   .flextable-content {
     position: relative;
-    margin: -1px;
-    padding: 1px;
-    overflow: auto;
   }
+
+    .flextable-content-overflow {
+      position: relative;
+      margin: -1px;
+      padding: 1px;
+      overflow: auto;
+    }
 
   .fextable .flextable__cell {
     transition: background-color 0.2s;
