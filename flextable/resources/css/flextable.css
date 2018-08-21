@@ -1,5 +1,4 @@
 .flextable-wrapper {
-  position: relative;
   padding: 14px;
   border-radius: 4px;
   border: 1px solid #e3e5e8;
@@ -37,7 +36,6 @@
 
   .flextable th,
   .flextable td {
-    position: relative;
     border: 1px solid #e3e5e8;
     empty-cells: show;
     height: 24px;

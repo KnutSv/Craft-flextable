@@ -1,5 +1,5 @@
 <template>
-  <textarea v-model="value" v-bind:data-keep="keepData.toString()" class="input-holder" :style="{top, left, width, height}" @click.stop="keepData = true" @focus="focusIn" @blur="focusOut" @input="update()" ref="input"></textarea>
+  <textarea v-model="value" v-bind:data-keep="keepData.toString()" class="input-holder" :style="{top, left, width, height, textAlign}" @click.stop="keepData = true" @focus="focusIn" @blur="focusOut" @input="update()" ref="input"></textarea>
 </template>
 
 <script>
@@ -47,6 +47,10 @@ export default {
     top() {
       return `${this.topInt + 2}px`
     },
+    textAlign() {
+      const activeCell = this.$store.getters.activeCell
+      return activeCell && activeCell.align
+    },
     width() {
       return `${this.widthInt - (this.widthPadding * 2) - 1}px`
     }
@@ -80,14 +84,15 @@ export default {
 
     },
     focusIn() {
-      this.value = this.keepData ? this.$store.getters.activeCellContent : ''
+      this.$store.commit('resetHelperMenu')
+      this.value = this.keepData ? this.$store.getters.activeCellContent.replace(new RegExp('<br />','g'), '\n') : ''
     },
     focusOut() {
       this.value = ''
       this.keepData = true
     },
     update() {
-      this.$store.dispatch('setContent', this.$refs.input.value)
+      this.$store.dispatch('setContent', this.$refs.input.value.replace(new RegExp('\r?\n','g'), '<br />'))
     }
   },
   mounted() {

@@ -7,16 +7,21 @@ export default new Vuex.Store({
   state: {
     activeElmCol: null,
     activeElmRow: null,
-    meta: {},
+    helperMenu: null,
+    meta: {
+      caption: ''
+    },
     tbody: [],
     tfoot: [],
     thead: []
   },
   getters: {
-    activeCellContent( state, getters ) {
+    activeCell( state, getters ) {
       if( state.activeElmCol == null ||state.activeElmRow == null ) { return null }
-
-      return state[getters.getRowPart()][getters.getRowIndex()][state.activeElmCol].text
+      return state[getters.getRowPart()][getters.getRowIndex()][state.activeElmCol]
+    },
+    activeCellContent( state, getters ) {
+      return getters.activeCell && getters.activeCell.text
     },
     colNum( state ) {
       return state.tbody.length ? state.tbody[0].length : state.thead.length ? state.thead[0].length : 0
@@ -30,7 +35,7 @@ export default new Vuex.Store({
       }
     },
     getRowIndex: ( state, getters ) => ( rowIndex = state.activeElmRow ) => {
-      return getters.isRowInHeader() ? rowIndex : rowIndex - state.thead.length
+      return getters.isRowInHeader(rowIndex) ? rowIndex : rowIndex - state.thead.length
     },
     getRowPart: ( state, getters ) => ( rowIndex = state.activeElmRow ) => {
       return getters.isRowInHeader(rowIndex) ? 'thead' : 'tbody'
@@ -65,19 +70,28 @@ export default new Vuex.Store({
   },
   mutations: {
     addBodyRow(state, options) {
-      state.tbody.splice(options.index, 0, options.row)
-    },
-    addColumn(state, options) {
+      const offset = options.offset || options.before ? 0 : 1
       // If the cell is to be added before, we add 0 making the cell take the current index's place
       // otherwise the cell is to be added after the selected cell and we add 1 (+Boolean => Int)
-      const index = options.index + !options.offset
+      const index = options.index + offset
+      state.tbody.splice(index, 0, options.row)
+    },
+    addColumn(state, options) {
+      const offset = options.offset || options.before ? 0 : 1
+      // If the cell is to be added before, we add 0 making the cell take the current index's place
+      // otherwise the cell is to be added after the selected cell and we add 1 (+Boolean => Int)
+      const index = options.index + offset
 
       state.thead.map(row => row.splice(index, 0, options.thCell))
       state.tbody.map(row => row.splice(index, 0, options.cell))
       state.tfoot.map(row => row.splice(index, 0, options.cell))
     },
     addHeaderRow(state, options) {
-      state.thead.splice(options.index, 0, options.row)
+      const offset = options.offset || options.before ? 0 : 1
+      // If the cell is to be added before, we add 0 making the cell take the current index's place
+      // otherwise the cell is to be added after the selected cell and we add 1 (+Boolean => Int)
+      const index = options.index + offset
+      state.thead.splice(index, 0, options.row)
     },
     init(state, data) {
       if( !data ) {
@@ -92,23 +106,81 @@ export default new Vuex.Store({
         }
       })
     },
+    removeBodyRow(state, index) {
+      state.tbody.splice(index, 1)
+
+      // Reset active since often causes issues
+      state.activeElmCol = null
+      state.activeElmRow = null
+      state.helperMenu = null
+    },
+    removeColumn(state, index) {
+      state.thead = state.thead.map(row => {
+        return row.filter((col, colIndex) => colIndex !== index)
+      })
+
+      state.tbody = state.tbody.map(row => {
+        return row.filter((col, colIndex) => colIndex !== index)
+      })
+
+      if( state.tbody.length === 0 ) {
+        state.activeElmCol = null
+        state.activeElmRow = null
+        state.helperMenu = null
+      } else if( index >= state.tbody.length - 1 ) {
+        state.activeElmCol = state.tbody.length - 2
+      }
+    },
+    removeHeaderRow(state, index) {
+      state.thead.splice(index, 1)
+
+      // Reset active since often causes issues
+      state.activeElmCol = null
+      state.activeElmRow = null
+      state.helperMenu = null
+    },
+    resetHelperMenu(state) {
+      state.helperMenu = null
+    },
     setActiveCol(state, colIndex) {
       state.activeElmCol = colIndex
     },
     setActiveRow(state, rowIndex) {
       state.activeElmRow = rowIndex
     },
+    setCaption(state, caption) {
+      state.meta.caption = caption
+    },
+    setCellAlignBody(state, data) {
+      Vue.set(state.tbody[data.rowIndex][data.colIndex], 'align', data.align)
+    },
+    setCellAlignHeader(state, data) {
+      Vue.set(state.thead[data.rowIndex][data.colIndex], 'align', data.align)
+    },
+    setCellTypeBody(state, data) {
+      Vue.set(state.tbody[data.rowIndex][data.colIndex], 'type', data.type)
+    },
+    setCellTypeHeader(state, data) {
+      Vue.set(state.thead[data.rowIndex][data.colIndex], 'type', data.type)
+    },
     setContent(state, data) {
       if( !('part' in data)  || !(data.part in state) || !('row' in data) || !('col' in data) ) { return }
 
       Vue.set(state[data.part][data.row][data.col], 'text', data.text )
+    },
+    setHelperMenu(state, data) {
+      state.helperMenu = {
+        type: data.type,
+        top: data.top,
+        left: data.left
+      }
     }
   },
   actions: {
     addColumn({ commit, getters }, options) {
       const defaultOptions = {
         index: getters.colNum - 1, // Default index is last index,
-        before: false,
+        before: false
       }
       options = Object.assign(defaultOptions, options)
 
@@ -119,19 +191,28 @@ export default new Vuex.Store({
     },
     addRow({ commit, getters }, options) {
       const defaultOptions = {
-        index: getters.colNum - 1, // Default index is last index,
+        index: getters.RowNum - 1, // Default index is last index,
         before: false
       }
+
       options = Object.assign(defaultOptions, options)
       options.header = getters.isRowInHeader(options.index)
+
+      options.index = getters.getRowIndex(options.index)
 
       options.row = []
 
       for (var j = 0; j < getters.colNum; j++) {
-        options.row.push(getters.makeCell('', this.header || getters.isColInHeader(j) ? 'th' : 'td'))
+        options.row.push(getters.makeCell('', options.header || getters.isColInHeader(j) ? 'th' : 'td'))
       }
 
       commit(options.header ? 'addHeaderRow' : 'addBodyRow', options)
+    },
+    deleteColumn({ commit, getters}, colIndex) {
+      commit('removeColumn', colIndex)
+    },
+    deleteRow({ commit, getters}, rowIndex) {
+      commit(getters.isRowInHeader(rowIndex) ? 'removeHeaderRow' : 'removeBodyRow', getters.getRowIndex(rowIndex))
     },
     initTable({ commit, state, getters }, options) {
       const initCols = options.cols || 2
@@ -220,6 +301,20 @@ export default new Vuex.Store({
 
       if( row != state.activeElmRow ) {
         commit('setActiveRow', row)
+      }
+    },
+    setCellAlignment({ commit, getters }, options) {
+      if( options && options.rowIndex !== null && options.colIndex !== null && options.align !== null ) {
+        options.header = getters.isRowInHeader(options.rowIndex)
+        options.rowIndex = options.header ? options.rowIndex : getters.getRowIndex(options.rowIndex)
+        commit(options.header ? 'setCellAlignHeader' : 'setCellAlignBody', options)
+      }
+    },
+    setCellType({ commit, getters }, options) {
+      if( options && options.rowIndex !== null && options.colIndex !== null && options.type !== null ) {
+        options.header = getters.isRowInHeader(options.rowIndex)
+        options.rowIndex = options.header ? options.rowIndex : getters.getRowIndex(options.rowIndex)
+        commit(options.header ? 'setCellTypeHeader' : 'setCellTypeBody', options)
       }
     },
     setContent({ commit, state, getters }, text) {
