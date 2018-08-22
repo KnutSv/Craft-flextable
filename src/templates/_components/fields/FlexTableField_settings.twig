@@ -1,0 +1,26 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * FlexTable plugin for Craft CMS
+ *
+ * FlexTableField Field Settings
+ *
+ * @author    Knut Svangstu
+ * @copyright Copyright (c) 2018 Knut Svangstu
+ * @link      https://vangenplotz.no/
+ * @package   FlexTable
+ * @since     2.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("knutsv\\flextable\\assetbundles\\flextable\\FlexTableAsset") %}
+
+{{ forms.textField({
+    label: 'Some Attribute',
+    instructions: 'Enter some attribute here.',
+    id: 'someAttribute',
+    name: 'someAttribute',
+    value: field['someAttribute']})
+}}

@@ -1,0 +1,40 @@
+{
+    "name": "knutsv/flex-table",
+    "description": "This field type makes creating and editing tables in Craft a breeze.",
+    "type": "craft-plugin",
+    "version": "2.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "flextable"
+    ],
+    "support": {
+        "docs": "https://github.com/KnutSv/Craft-flextable/blob/master/README.md",
+        "issues": "https://github.com/KnutSv/Craft-flextable/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Knut Svangstu",
+            "homepage": "https://vangenplotz.no/"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "knutsv\\flextable\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "FlexTable",
+        "handle": "flex-table",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/KnutSv/Craft-flextable/master/CHANGELOG.md",
+        "class": "knutsv\\flextable\\FlexTable"
+    }
+}

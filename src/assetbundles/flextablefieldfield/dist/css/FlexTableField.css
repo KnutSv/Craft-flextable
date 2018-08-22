@@ -1,0 +1,159 @@
+/**
+ * FlexTable plugin for Craft CMS
+ *
+ * FlexTableField Field CSS
+ *
+ * @author    Knut Svangstu
+ * @copyright Copyright (c) 2018 Knut Svangstu
+ * @link      https://vangenplotz.no/
+ * @package   FlexTable
+ * @since     2.0.0
+ */
+
+
+.flextable-wrapper {
+  padding: 14px;
+  border-radius: 4px;
+  border: 1px solid #e3e5e8;
+  background: #fafafa;
+}
+
+.flextable-overflow-wrapper {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.matrixblock .flextable-wrapper {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.flextable-wrapper input.text {
+  margin-bottom: 15px;
+}
+
+.flextable {
+  position: relative;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+  .flextable th {
+    background-color: #f7f7f8;
+  }
+
+  .flextable td {
+    background-color: #fff;
+  }
+
+  .flextable th,
+  .flextable td {
+    border: 1px solid #e3e5e8;
+    empty-cells: show;
+    height: 24px;
+    min-width: 100px;
+    vertical-align: top;
+  }
+
+  .flextable th,
+  .flextable td,
+  .flextable__textarea {
+    padding: 6px 12px;
+    line-height: 24px;
+    font-size: 15px;
+  }
+
+  .flextable td[align=right],
+  .flextable th[align=right] {
+    text-align: right;
+  }
+
+  .flextable td[align=center],
+  .flextable th[align=center] {
+    text-align: center;
+  }
+
+  .flextable__textarea {
+    position: absolute;
+    z-index: 1000;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    left: -1px;
+    margin: 0;
+    border: 1px solid #000;
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    box-sizing: border-box;
+    min-height: 37px;
+    overflow: auto; /* for IE11 */
+    resize: none;
+    -ms-overflow-style: none;
+  }
+
+  .flextable__textarea:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    -moz-appearance:none;
+  }
+
+  .flextable__contextmenu {
+    position: absolute;
+    z-index: 10000;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  }
+
+    .flextable__contextmenu hr {
+      margin: -1px 0 0;
+      position: relative;
+      border-color: #29323d;
+    }
+
+    .flextable__contextmenu__btn {
+      display: block;
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      padding: 8px;
+      background-color: white;
+      box-shadow: none;
+      text-align: left;
+      transition: background-color 0.3s;
+    }
+
+    .flextable__contextmenu__btn + .flextable__contextmenu__btn {
+      border-top: 1px solid #e3e5e8;
+    }
+
+    .flextable__contextmenu__btn:hover,
+    .flextable__contextmenu__btn:focus {
+      background-color: #d5d8dd;
+    }
+
+  .flextable__alignmenu {
+    position: absolute;
+    z-index: 1000;
+  }
+
+    .flextable__alignmenu__btn {
+      float: left;
+      border-width: 1px 0 0;
+      border-style: solid;
+      border-color: #e3e5e8;
+      width: 33.333%;
+      box-sizing: border-box;
+      background-color: #f7f7f8;
+    }
+
+    .flextable__alignmenu__btn:first-child {
+      border-left-width: 1px;
+      border-top-left-radius: 4px;
+    }
+    .flextable__alignmenu__btn:last-child {
+      border-right-width: 1px;
+      border-top-right-radius: 4px;
+    }

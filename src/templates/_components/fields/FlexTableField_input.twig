@@ -1,0 +1,20 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * FlexTable plugin for Craft CMS 3.x
+ *
+ * FlexTableField Field Input
+ *
+ * @author    Knut Svangstu
+ * @copyright Copyright (c) 2018 Knut Svangstu
+ * @link      https://vangenplotz.no/
+ * @package   FlexTable
+ * @since     2.0.0
+ */
+#}
+
+<div class="flextable-wrapper">
+  <div class="vue-flextable-app">
+    <flextable :value="{{ value | json_encode() }}" id="{{ id }}" name="{{ name }}"></flextable>
+  </div>
+</div>
