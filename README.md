@@ -7,7 +7,7 @@ This field type makes creating and editing tables in Craft a breeze.
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0.0-beta.23 or later.
+This plugin requires Craft CMS 3.0.0 or later.
 
 ## Installation
 
