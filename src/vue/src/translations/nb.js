@@ -1,5 +1,5 @@
 module.exports = {
-  no: {
+  nb: {
     ADD_COLUMN: "Legg til kolonne",
     ADD_ROW: "Legg til rad",
     BUTTON_CREATE_TABLE_HEADER_LEFT: "Opprett tabell med tabelloverskrift loddrett til venstre",

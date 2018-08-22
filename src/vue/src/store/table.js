@@ -82,9 +82,9 @@ export default new Vuex.Store({
       // otherwise the cell is to be added after the selected cell and we add 1 (+Boolean => Int)
       const index = options.index + offset
 
-      state.thead.map(row => row.splice(index, 0, options.thCell))
-      state.tbody.map(row => row.splice(index, 0, options.cell))
-      state.tfoot.map(row => row.splice(index, 0, options.cell))
+      state.thead.map( row => row.splice( index, 0, Object.assign({}, options.thCell) ) )
+      state.tbody.map( row => row.splice( index, 0, Object.assign({}, options.cell) ) )
+      state.tfoot.map( row => row.splice( index, 0, Object.assign({}, options.cell) ) )
     },
     addHeaderRow(state, options) {
       const offset = options.offset || options.before ? 0 : 1

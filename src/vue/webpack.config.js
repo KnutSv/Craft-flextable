@@ -4,9 +4,9 @@ var webpack = require('webpack')
 module.exports = {
   entry: './src/flextable.js',
   output: {
-    path: path.resolve(__dirname, './../resources/js'),
-    publicPath: path.resolve(__dirname, './../resources/js'),
-    filename: 'vue-flextable.js'
+    path: path.resolve(__dirname, './../assetbundles/flextablefieldfield/dist/js'),
+    publicPath: path.resolve(__dirname, './../assetbundles/flextablefieldfield/dist/js'),
+    filename: 'FlexTableField.js'
   },
   module: {
     rules: [

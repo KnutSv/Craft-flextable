@@ -1,3 +1,16 @@
+/**
+ * FlexTable plugin for Craft CMS
+ *
+ * FlexTableField Field CSS
+ *
+ * @author    Knut Svangstu
+ * @copyright Copyright (c) 2018 Knut Svangstu
+ * @link      https://vangenplotz.no/
+ * @package   FlexTable
+ * @since     2.0.0
+ */
+
+
 .flextable-wrapper {
   padding: 14px;
   border-radius: 4px;
