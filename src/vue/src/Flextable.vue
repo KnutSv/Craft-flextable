@@ -1,16 +1,16 @@
 <template>
-  <div :id="`flextable_${_uid}`">
+  <div v-if="id" :id="`flextable_${_uid}`">
     <input type="hidden" :id="id" :name="name" :value="JSON.stringify(data)">
 
-    <init v-if="$store.getters.isEmpty"></init>
+    <init v-if="isEmpty" v-bind:id="id"></init>
     <div v-else>
       <div>
         <label v-bind:for="`caption_input_${_uid}`">{{ $t('CAPTION') }}</label>
         <input v-bind:value="caption" v-bind:id="`caption_input_${_uid}`" @input="updateCaption" class="text fullwidth" type="text">
       </div>
       <div style="margin-bottom: 16px;">
-        <button @click.stop.prevent="$store.dispatch('addColumn')">{{ $t('ADD_COLUMN') }}</button>
-        <button @click.stop.prevent="$store.dispatch('addRow')">{{ $t('ADD_ROW') }}</button>
+        <button @click.stop.prevent="addColumn">{{ $t('ADD_COLUMN') }}</button>
+        <button @click.stop.prevent="addRow">{{ $t('ADD_ROW') }}</button>
       </div>
       <div id="flextable-editor-toolbar"></div>
       <div class="flextable-content">
@@ -18,14 +18,14 @@
           <table class="flextable">
             <tr v-for="(row, rowIndex) in rows">
               <template v-for="(cell, colIndex) in row">
-                <th @click.right.prevent="helperMenu($event, rowIndex, colIndex)" v-if="cell.type === 'th'" v-html="format(cell.text)" v-bind:class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)"></th>
-                <td @click.right.prevent="helperMenu($event, rowIndex, colIndex)" v-else v-html="format(cell.text)" v-bind:class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)"></td>
+                <th v-if="cell.type === 'th'" v-html="format(cell.text)" :class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)" @click.right.prevent="helperMenu($event, rowIndex, colIndex)"></th>
+                <td v-else v-html="format(cell.text)" :class="{'align--right': cell.align == 'right', 'flextable__cell': true, 'flextable__cell--active': isActiveCell(rowIndex, colIndex)}" :ref="`cell_${rowIndex}_${colIndex}`" @click.stop="select(rowIndex, colIndex)"  @click.right.prevent="helperMenu($event, rowIndex, colIndex)"></td>
               </template>
             </tr>
           </table>
-          <active-cell-marker v-bind:activeElm="activeElm"></active-cell-marker>
+          <active-cell-marker :activeElm="activeElm" :id="id"></active-cell-marker>
         </div>
-        <helper-menu></helper-menu>
+        <helper-menu :id="id"></helper-menu>
       </div>
     </div>
   </div>
@@ -60,28 +60,32 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      caption: state => state.meta.caption
-    }),
+/*    ...mapState(this.namespace, {
+      activeElmCol: state => state.activeElmCol,
+      activeElmRow: state => state.activeElmRow,
+      meta: state => state.meta,
+    }),*/
+    ...mapState(['activeTable', 'activeElmCol', 'activeElmRow']),
+    data() {
+      return this.$store.getters['data'](this.id)
+    },
+    caption() {
+      return this.data && this.data.meta.caption
+    },
     activeElm() {
       const ref = `cell_${this.activeElmRow}_${this.activeElmCol}`
       const elm = this.$refs.hasOwnProperty(ref) ? this.$refs[ref][0] : null
+
       if(elm) {
         this.activeElmOldContent = elm.textContent
       }
       return elm
     },
-    activeElmCol() {
-      return this.$store.state.activeElmCol
-    },
-    activeElmRow() {
-      return this.$store.state.activeElmRow
-    },
-    data() {
-      return this.$store.getters.data
+    isEmpty() {
+      return this.$store.getters['isEmpty'](this.id)
     },
     rows() {
-      return this.data.thead.concat(this.data.tbody)
+      return this.data && this.data.thead.concat(this.data.tbody)
     }
   },
   components: {
@@ -90,6 +94,18 @@ export default {
     Init
   },
   methods: {
+    addColumn() {
+      this.$store.dispatch('addColumn', {
+        tableName: this.id,
+        index: this.$store.getters['colNum'](this.id) - 1,
+      })
+    },
+    addRow() {
+      this.$store.dispatch('addRow', {
+        tableName: this.id,
+        index: this.$store.getters['rowNum'](this.id) - 1,
+      })
+    },
     checkKey(event) {
       if(event.key === 'Escape') {
         this.resetActive(false)
@@ -109,7 +125,7 @@ export default {
       this.select(rowIndex, colIndex, true)
     },
     isActiveCell(rowIndex, colIndex) {
-      return rowIndex === this.activeElmRow && colIndex === this.activeElmCol
+      return this.activeTable === this.id && rowIndex === this.activeElmRow && colIndex === this.activeElmCol
     },
     resetActive(update = true) {
       if(!update) {
@@ -125,15 +141,22 @@ export default {
         this.$store.commit('resetHelperMenu')
       }
 
+      this.$store.commit('setActiveTable', this.id)
       this.$store.commit('setActiveRow', rowIndex)
       this.$store.commit('setActiveCol', colIndex)
     },
     updateCaption(event) {
-      this.$store.commit('setCaption', event.target.value)
+      this.$store.commit('setCaption', {
+        tableName: this.id,
+        value: event.target.value
+      })
     }
   },
   mounted() {
-    this.$store.commit('init', this.value)
+    this.$store.commit('init', {
+      tableName: this.id,
+      value: this.value
+    })
     window.addEventListener('click', this.resetActive)
     window.addEventListener('keydown', this.checkKey)
   },

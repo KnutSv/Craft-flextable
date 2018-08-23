@@ -1,5 +1,5 @@
 <template>
-  <div v-if="helperMenu" class="helper-menu" v-bind:style="`top: ${helperMenu.top}px; left: ${helperMenu.left}px;`">
+  <div v-if="activeTable == id && helperMenu" class="helper-menu" v-bind:style="`top: ${helperMenu.top}px; left: ${helperMenu.left}px;`">
     <button @click.prevent.stop="handle_add_col_after" class="helper-menu__button">{{ $t('HELPER_MENU_ADD_COLUMN_AFTER') }}</button>
     <button @click.prevent.stop="handle_add_col_before" class="helper-menu__button">{{ $t('HELPER_MENU_ADD_COLUMN_BEFORE') }}</button>
     <button @click.prevent.stop="handle_add_row_above" class="helper-menu__button">{{ $t('HELPER_MENU_ADD_ROW_ABOVE') }}</button>
@@ -27,8 +27,14 @@ import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'helper-menu',
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   computed: {
-    ...mapState(['activeElmCol', 'activeElmRow', 'helperMenu']),
+    ...mapState(['activeElmCol', 'activeElmRow', 'activeTable', 'helperMenu']),
     ...mapGetters(['activeCell', 'colNum', 'rowNum']),
     activeCellTextAlign() {
       return this.activeCell && this.activeCell.align
@@ -43,18 +49,21 @@ export default {
   methods: {
     addCol(before) {
       this.$store.dispatch('addColumn', {
+        tableName: this.id,
         index: this.activeElmCol,
         before: before
       })
     },
     addRow(before) {
       this.$store.dispatch('addRow', {
+        tableName: this.id,
         index: this.activeElmRow,
         before: before
       })
     },
     changeAlignmentCell(direction, row, col) {
       this.$store.dispatch('setCellAlignment', {
+        tableName: this.id,
         rowIndex: row != null ? row : this.activeElmRow,
         colIndex: col != null ? col : this.activeElmCol,
         align: direction
@@ -62,17 +71,18 @@ export default {
       this.$store.commit('resetHelperMenu')
     },
     changeAlignmentCol(direction) {
-      for (var i = 0; i < this.rowNum; i++) {
+      for (var i = 0; i < this.rowNum(); i++) {
         this.changeAlignmentCell(direction, i)
       }
     },
     changeAlignmentRow(direction) {
-      for (var i = 0; i < this.colNum; i++) {
+      for (var i = 0; i < this.colNum(); i++) {
         this.changeAlignmentCell(direction, this.activeElmRow, i)
       }
     },
     changeCellType(type, row, col) {
       this.$store.dispatch('setCellType', {
+        tableName: this.id,
         rowIndex: row != null ? row : this.activeElmRow,
         colIndex: col != null ? col : this.activeElmCol,
         type: type
@@ -80,12 +90,12 @@ export default {
       this.$store.commit('resetHelperMenu')
     },
     changeCol(type) {
-      for (var i = 0; i < this.rowNum; i++) {
+      for (var i = 0; i < this.rowNum(); i++) {
         this.changeCellType(type, i)
       }
     },
     changeRow(type) {
-      for (var i = 0; i < this.colNum; i++) {
+      for (var i = 0; i < this.colNum(); i++) {
         this.changeCellType(type, this.activeElmRow, i)
       }
     },
@@ -126,12 +136,18 @@ export default {
     },
     handle_delete_col() {
       if( window.confirm( this.$t('CONFIRM_DELETE_COLUMN') ) ) {
-        this.$store.dispatch('deleteColumn', this.activeElmCol)
+        this.$store.dispatch('deleteColumn', {
+          tableName: this.id,
+          col: this.activeElmCol
+        })
       }
     },
     handle_delete_row() {
       if( window.confirm( this.$t('CONFIRM_DELETE_ROW') ) ) {
-        this.$store.dispatch('deleteRow', this.activeElmRow)
+        this.$store.dispatch('deleteRow', {
+          tableName: this.id,
+          row: this.activeElmRow
+        })
       }
     },
     handle_make_body_cell() {

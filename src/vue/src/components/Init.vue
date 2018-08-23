@@ -33,6 +33,12 @@
 <script>
 export default {
   name: 'init',
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
       cols: 2,
@@ -42,6 +48,7 @@ export default {
   methods: {
     intTable(mode) {
       this.$store.dispatch('initTable', {
+        tableName: this.id,
         mode: mode,
         rows: this.rows,
         cols: this.cols

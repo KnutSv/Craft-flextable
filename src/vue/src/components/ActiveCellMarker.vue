@@ -1,15 +1,16 @@
 <template>
-  <div v-if="activeElm">
+  <div v-if="activeTable === id && activeElm">
     <div class="marker marker--h" :style="{top, left, width}"></div>
     <div class="marker marker--v" :style="{top, left: right, height}"></div>
     <div class="marker marker--h" :style="{top: bottom, left, width}"></div>
     <div class="marker marker--v" :style="{top, left, height}"></div>
-    <active-cell-input-holder :heightInt="heightInt" :leftInt="leftInt" :topInt="topInt" :widthInt="widthInt" @click.stop=""></active-cell-input-holder>
+    <active-cell-input-holder :id="id" :heightInt="heightInt" :leftInt="leftInt" :topInt="topInt" :widthInt="widthInt" @click.stop=""></active-cell-input-holder>
   </div>
 </template>
 
 <script>
 import debounce from 'debounce'
+import { mapState } from 'vuex'
 
 import ActiveCellInputHolder from './ActiveCellInputHolder.vue'
 
@@ -19,6 +20,10 @@ export default {
     activeElm: {
       type: HTMLElement,
       required: false
+    },
+    id: {
+      type: String,
+      required: true
     }
   },
   data() {
@@ -27,6 +32,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['activeTable']),
     bottom() {
       return `${this.bottomInt}px`
     },

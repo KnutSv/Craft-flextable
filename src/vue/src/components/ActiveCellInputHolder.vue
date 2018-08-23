@@ -10,6 +10,10 @@ export default {
       type: Number,
       required: true
     },
+    id: {
+      type: String,
+      required: true
+    },
     leftInt: {
       type: Number,
       required: true
@@ -32,12 +36,6 @@ export default {
     }
   },
   computed: {
-    activeElmCol() {
-      return this.$store.state.activeElmCol
-    },
-    activeElmRow() {
-      return this.$store.state.activeElmRow
-    },
     height() {
       return `${this.heightInt - (this.heightPadding * 2) - 1}px`
     },
@@ -80,9 +78,6 @@ export default {
         this.$refs.input.focus()
       }
     },
-    checkKeyUp(event) {
-
-    },
     focusIn() {
       this.$store.commit('resetHelperMenu')
       this.value = this.keepData ? this.$store.getters.activeCellContent.replace(new RegExp('<br />','g'), '\n') : ''
@@ -92,7 +87,10 @@ export default {
       this.keepData = true
     },
     update() {
-      this.$store.dispatch('setContent', this.$refs.input.value.replace(new RegExp('\r?\n','g'), '<br />'))
+      this.$store.dispatch('setContent', {
+        tableName: this.id,
+        value: this.$refs.input.value.replace(new RegExp('\r?\n','g'), '<br />')
+      })
     }
   },
   mounted() {

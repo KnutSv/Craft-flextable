@@ -113,6 +113,17 @@ class FlexTableField extends Field
         $id = Craft::$app->getView()->formatInputId($this->handle);
         $namespacedId = Craft::$app->getView()->namespaceInputId($id);
 
+        // Variables to pass down to our field JavaScript to let it namespace properly
+/*        $jsonVars = [
+            'id' => $id,
+            'name' => $this->handle,
+            'namespace' => $namespacedId,
+            'prefix' => Craft::$app->getView()->namespaceInputId(''),
+            ];
+        $jsonVars = Json::encode($jsonVars);
+        Craft::$app->getView()->registerJs("$('#{$namespacedId}-field').FlexTableFlexTableField(" . $jsonVars . ");");*/
+        Craft::$app->getView()->registerJs('window.initVue("' . $namespacedId . '")');
+
         // Render the input template
         return Craft::$app->getView()->renderTemplate(
             'flex-table/_components/fields/FlexTableField_input',
