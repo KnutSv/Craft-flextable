@@ -13,3 +13,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Changed
 - Fixed issue with flextable in matrix fields
 - Fixed issue with multiple flextables on the same page
+
+## 2.0.4 - 2018-08-24
+### Changed
+- Compiled assets for production

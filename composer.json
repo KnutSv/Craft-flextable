@@ -2,7 +2,7 @@
     "name": "knutsv/flex-table",
     "description": "This field type makes creating and editing tables in Craft a breeze.",
     "type": "craft-plugin",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "keywords": [
         "craft",
         "cms",
